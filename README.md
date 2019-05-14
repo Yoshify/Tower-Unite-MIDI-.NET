@@ -44,12 +44,13 @@ open your Tower Unite window and hit the **F1** key.
       Enables the logging of events such as MIDI key presses.
       
 ## Doesn't a program like this already exist?
-Yes, it was written in python by a steam user called Mattio. This was great for a while, but my reason for creating this alternative is primarily because Mattio's version had some limitations.
+[Yes, it was written in python by a steam user called Mattio](https://steamcommunity.com/sharedfiles/filedetails/?id=673866155). This was great for a while, but my reason for creating this alternative is primarily because Mattio's version had some limitations.
 1. It hasn't been updated in 2 years.
 2. It required devices to specifically use MIDI channel 1.
 3. It very rarely had good black key presses.
 4. It didn't offer MIDI playback.
-My program not only solves these limitations, but offers far more customisation.
+
+My program not only solves these limitations, but offers a fair bit more in terms of functionality.
 
 ## Isn't automation software against the rules?
 Macroing is a touchy subject in Tower Unite. [As stated here](https://forums.pixeltailgames.com/t/regarding-piano-macros/14111/15) by the lead developer of Tower Unite, piano macro's are okay, and I've personally never experienced an issue during testing. Even though this software doesn't inject anything and only sends keypresses, I'd still take care in condo's as condo's are VAC protected, and VAC doesn't discriminate. Please always make sure to take care in starting and stopping the software only while you're on the piano, and as always, this software is used at your own risk.
