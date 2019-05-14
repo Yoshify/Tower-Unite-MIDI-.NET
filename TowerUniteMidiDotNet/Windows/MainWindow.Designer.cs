@@ -1,4 +1,4 @@
-﻿namespace TowerUniteMidiDotNet
+﻿namespace TowerUniteMidiDotNet.Windows
 {
 	partial class MainWindow
 	{
@@ -123,6 +123,7 @@
 			// 
 			// StopListeningButton
 			// 
+			this.StopListeningButton.Enabled = false;
 			this.StopListeningButton.Location = new System.Drawing.Point(6, 101);
 			this.StopListeningButton.Name = "StopListeningButton";
 			this.StopListeningButton.Size = new System.Drawing.Size(290, 32);
@@ -134,6 +135,7 @@
 			// 
 			// StartListeningButton
 			// 
+			this.StartListeningButton.Enabled = false;
 			this.StartListeningButton.Location = new System.Drawing.Point(6, 63);
 			this.StartListeningButton.Name = "StartListeningButton";
 			this.StartListeningButton.Size = new System.Drawing.Size(290, 32);
@@ -224,6 +226,7 @@
 			// 
 			// MIDIStopButton
 			// 
+			this.MIDIStopButton.Enabled = false;
 			this.MIDIStopButton.Location = new System.Drawing.Point(156, 35);
 			this.MIDIStopButton.Name = "MIDIStopButton";
 			this.MIDIStopButton.Size = new System.Drawing.Size(140, 23);
@@ -235,6 +238,7 @@
 			// 
 			// MIDIPlayButton
 			// 
+			this.MIDIPlayButton.Enabled = false;
 			this.MIDIPlayButton.Location = new System.Drawing.Point(6, 35);
 			this.MIDIPlayButton.Name = "MIDIPlayButton";
 			this.MIDIPlayButton.Size = new System.Drawing.Size(140, 23);

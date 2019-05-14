@@ -1,6 +1,7 @@
 ﻿using WindowsInput;
 using WindowsInput.Native;
 using System.Windows.Input;
+using TowerUniteMidiDotNet.Windows;
 
 namespace TowerUniteMidiDotNet.Core
 {

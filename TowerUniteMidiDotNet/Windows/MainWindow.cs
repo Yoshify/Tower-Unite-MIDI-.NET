@@ -1,25 +1,23 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.Collections.Generic;
-using Melanchall.DryWetMidi.Devices;
-using NAudio.Midi;
-using TowerUniteMidiDotNet.Core;
-using TowerUniteMidiDotNet.Util;
 using NHotkey;
 using NHotkey.WindowsForms;
+using Melanchall.DryWetMidi.Smf;
+using Melanchall.DryWetMidi.Devices;
+using TowerUniteMidiDotNet.Core;
+using TowerUniteMidiDotNet.Util;
 
-namespace TowerUniteMidiDotNet
+namespace TowerUniteMidiDotNet.Windows
 {
 	public partial class MainWindow : Form
 	{
-		public const float VersionNumber = 1.0f;
+		public const float VersionNumber = 1.1f;
 		public static int KeyDelay = 15;
 
-		private MidiIn midiIn;
-		private int midiDeviceIndex = -1;
+		private InputDevice currentMidiDevice;
 		private int noteLookupOctaveTransposition = 3;
-		private MidiContainer currentMidi;
-		private OpenFileDialog openFileDialog;
+		private MidiContainer currentMidiFile;
 		private bool detailedLogging = false;
 		private int midiTransposition = 0;
 		private double midiPlaybackSpeed = 1.0;
@@ -43,11 +41,11 @@ namespace TowerUniteMidiDotNet
 		/// </summary>
 		private class MidiContainer
 		{
-			public Melanchall.DryWetMidi.Smf.MidiFile MidiFile;
+			public MidiFile MidiFile;
 			public Playback MidiPlayback;
 			public string MidiName;
 
-			public MidiContainer(string name, Melanchall.DryWetMidi.Smf.MidiFile file)
+			public MidiContainer(string name, MidiFile file)
 			{
 				MidiFile = file;
 				MidiName = name;
@@ -65,57 +63,10 @@ namespace TowerUniteMidiDotNet
 			MIDIPlaybackSpeedSlider.Value = 10;
 			MIDIPlaybackTransposeSlider.Value = 0;
 			OctaveTranspositionSlider.Value = 0;
-			StartListeningButton.Enabled = false;
-			StopListeningButton.Enabled = false;
-			MIDIPlayButton.Enabled = false;
-			MIDIStopButton.Enabled = false;
 
 			HotkeyManager.Current.AddOrReplace("Start", startKey, OnHotkeyPress);
 			HotkeyManager.Current.AddOrReplace("Stop", stopKey, OnHotkeyPress);
 			Text += " " + VersionNumber.ToString("0.0");
-		}
-
-		private void OnHotkeyPress(object sender, HotkeyEventArgs e)
-		{
-			switch(e.Name)
-			{
-				case "Start":
-
-					if(TabControl.SelectedIndex == 0)
-					{
-						if(StartListeningButton.Enabled)
-						{
-							StartListening();
-						}
-					}
-					else
-					{
-						if(MIDIPlayButton.Enabled)
-						{
-							PlayMidi();
-						}
-					}
-
-					break;
-				case "Stop":
-
-					if (TabControl.SelectedIndex == 0)
-					{
-						if(StopListeningButton.Enabled)
-						{
-							StopListening();
-						}
-					}
-					else
-					{
-						if(MIDIStopButton.Enabled)
-						{
-							StopMidi();
-						}
-					}
-
-					break;
-			}
 		}
 
 		/// <summary>
@@ -125,9 +76,9 @@ namespace TowerUniteMidiDotNet
 		{
 			DeviceComboBox.Items.Clear();
 
-			for (int device = 0; device < MidiIn.NumberOfDevices; device++)
+			foreach(InputDevice device in InputDevice.GetAll())
 			{
-				DeviceComboBox.Items.Add(MidiIn.DeviceInfo(device).ProductName);
+				DeviceComboBox.Items.Add($"{device.Name } ID:{device.Id}");
 			}
 		}
 
@@ -181,26 +132,26 @@ namespace TowerUniteMidiDotNet
 
 		private void PlayMidi()
 		{
-			if (currentMidi == null || currentMidi.MidiPlayback.IsRunning)
+			if (currentMidiFile == null || currentMidiFile.MidiPlayback.IsRunning)
 			{
 				return;
 			}
-			else if (currentMidi != null)
+			else if (currentMidiFile != null)
 			{
-				currentMidi.MidiPlayback.NotesPlaybackStarted -= OnMidiPlaybackNoteEventRecieved;
+				currentMidiFile.MidiPlayback.NotesPlaybackStarted -= OnMidiPlaybackNoteEventReceived;
 			}
 
 			MIDIPlaybackTransposeSlider.Enabled = false;
 			MIDIPlaybackSpeedSlider.Enabled = false;
 
-			currentMidi.MidiPlayback.NotesPlaybackStarted += OnMidiPlaybackNoteEventRecieved;
-			currentMidi.MidiPlayback.Finished += OnMidiPlaybackComplete;
-			currentMidi.MidiPlayback.Speed = midiPlaybackSpeed;
-			currentMidi.MidiPlayback.Start();
-			Log($"Started playing {currentMidi.MidiName}.");
+			currentMidiFile.MidiPlayback.NotesPlaybackStarted += OnMidiPlaybackNoteEventReceived;
+			currentMidiFile.MidiPlayback.Finished += OnMidiPlaybackComplete;
+			currentMidiFile.MidiPlayback.Speed = midiPlaybackSpeed;
+			currentMidiFile.MidiPlayback.Start();
+			Log($"Started playing {currentMidiFile.MidiName}.");
 		}
 
-		private void OnMidiPlaybackNoteEventRecieved(object sender, NotesEventArgs e)
+		private void OnMidiPlaybackNoteEventReceived(object sender, NotesEventArgs e)
 		{
 			foreach (Melanchall.DryWetMidi.Smf.Interaction.Note midiNote in e.Notes)
 			{
@@ -211,7 +162,7 @@ namespace TowerUniteMidiDotNet
 					{
 						Invoke((MethodInvoker)(() =>
 						{
-							Log($"Recieved MIDI number {midiNote.NoteNumber}, the note is {note.NoteCharacter}.");
+							Log($"Recieved MIDI number {midiNote.NoteNumber}, the note is {(note.IsShiftedKey ? "^" : string.Empty)}{note.NoteCharacter}.");
 						}));
 					}
 				}
@@ -220,67 +171,73 @@ namespace TowerUniteMidiDotNet
 
 		private void StopMidi()
 		{
-			if (currentMidi?.MidiPlayback.IsRunning == true)
+			if (currentMidiFile?.MidiPlayback.IsRunning == true)
 			{
 				MIDIPlaybackTransposeSlider.Enabled = true;
 				MIDIPlaybackSpeedSlider.Enabled = true;
-				currentMidi.MidiPlayback.Stop();
-				currentMidi.MidiPlayback.MoveToStart();
-				Log($"Stopped playing {currentMidi.MidiName}.");
+				currentMidiFile.MidiPlayback.Stop();
+				currentMidiFile.MidiPlayback.MoveToStart();
+				Log($"Stopped playing {currentMidiFile.MidiName}.");
 			}
 		}
 
 		private void OnMidiPlaybackComplete(object sender, EventArgs e)
 		{
-			currentMidi.MidiPlayback.OutputDevice.Dispose();
+			currentMidiFile.MidiPlayback.OutputDevice.Dispose();
 		}
 
 		#endregion
 
 		#region MIDI In
 
-		private void SelectDevice(int deviceIndex)
+		private void SelectDevice(int id)
 		{
-			if (midiDeviceIndex != deviceIndex && midiIn != null)
+			InputDevice newDevice = InputDevice.GetById(id);
+
+			if(currentMidiDevice?.Id == newDevice.Id)
 			{
-				midiIn.MessageReceived -= OnMidiEventRecieved;
-				midiIn.Dispose();
+				return;
+			}
+			else
+			{
+				if(currentMidiDevice != null)
+				{
+					currentMidiDevice.EventReceived -= OnMidiEventReceived;
+					currentMidiDevice.Dispose();
+				}
 			}
 
-			midiDeviceIndex = deviceIndex;
-			midiIn = new MidiIn(deviceIndex);
-			midiIn.MessageReceived += OnMidiEventRecieved;
-			Log($"Selected {MidiIn.DeviceInfo(deviceIndex).ProductName}.");
+			currentMidiDevice = newDevice;
+			currentMidiDevice.EventReceived += OnMidiEventReceived;
+			Log($"Selected {currentMidiDevice.Name}.");
 		}
 
 		private void StartListening()
 		{
-			midiIn?.Start();
-			Log($"Started listening to '{MidiIn.DeviceInfo(midiDeviceIndex).ProductName}'.");
+			currentMidiDevice.StartEventsListening();
+			Log($"Started listening to '{currentMidiDevice.Name}'.");
 		}
 
 		private void StopListening()
 		{
-			midiIn?.Stop();
-			Log($"Stopped listening to '{MidiIn.DeviceInfo(midiDeviceIndex).ProductName}'.");
+			currentMidiDevice.StopEventsListening();
+			Log($"Stopped listening to '{currentMidiDevice.Name}'.");
 		}
 
-		private void OnMidiEventRecieved(object sender, MidiInMessageEventArgs e)
+		private void OnMidiEventReceived(object sender, MidiEventReceivedEventArgs e)
 		{
-			if (e.MidiEvent is NoteOnEvent)
+			if(e.Event is NoteOnEvent)
 			{
-				var noteOnEvent = e.MidiEvent as NoteOnEvent;
-				var noteEvent = e.MidiEvent as NoteOnEvent;
-				noteLookup.TryGetValue(noteEvent.NoteNumber, out Note note);
-
-				if (note != null)
+				NoteOnEvent evt = e.Event as NoteOnEvent;
+				
+				if(noteLookup.TryGetValue(evt.NoteNumber, out Note note))
 				{
 					note.Play();
-					if (detailedLogging)
+					if(detailedLogging)
 					{
 						Invoke((MethodInvoker)(() =>
 						{
-							Log($"Recieved MIDI number {noteEvent.NoteNumber}, the note is {note.NoteCharacter}.");
+							Log($"Recieved MIDI number {evt.NoteNumber}, the note is {(note.IsShiftedKey ? "^" : string.Empty)}{note.NoteCharacter}.");
 						}));
 					}
 				}
@@ -289,11 +246,50 @@ namespace TowerUniteMidiDotNet
 
 		#endregion
 
-		#region UI Event Handlers
+		#region Event Handlers
+
+		private void OnHotkeyPress(object sender, HotkeyEventArgs e)
+		{
+			switch (e.Name)
+			{
+				case "Start":
+					if (TabControl.SelectedIndex == 0)
+					{
+						if (StartListeningButton.Enabled)
+						{
+							StartListening();
+						}
+					}
+					else
+					{
+						if (MIDIPlayButton.Enabled)
+						{
+							PlayMidi();
+						}
+					}
+					break;
+				case "Stop":
+					if (TabControl.SelectedIndex == 0)
+					{
+						if (StopListeningButton.Enabled)
+						{
+							StopListening();
+						}
+					}
+					else
+					{
+						if (MIDIStopButton.Enabled)
+						{
+							StopMidi();
+						}
+					}
+					break;
+			}
+		}
 
 		private void DeviceComboBox_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			if(DeviceComboBox.SelectedIndex == midiDeviceIndex)
+			if(InputDevice.GetById(DeviceComboBox.SelectedIndex) == currentMidiDevice)
 			{
 				return;
 			}
@@ -315,7 +311,7 @@ namespace TowerUniteMidiDotNet
 
 		private void MIDIBrowseButton_Click(object sender, EventArgs e)
 		{
-			openFileDialog = new OpenFileDialog()
+			OpenFileDialog openFileDialog = new OpenFileDialog()
 			{
 				FileName = "Select your MIDI file.",
 				Filter = "MIDI Files (*.mid;*.midi)|*.mid;*.midi",
@@ -325,8 +321,8 @@ namespace TowerUniteMidiDotNet
 
 			if (openFileDialog.ShowDialog() == DialogResult.OK)
 			{
-				currentMidi?.MidiPlayback.OutputDevice.Dispose();
-				currentMidi = new MidiContainer(openFileDialog.SafeFileName, Melanchall.DryWetMidi.Smf.MidiFile.Read(openFileDialog.FileName));
+				currentMidiFile?.MidiPlayback.OutputDevice.Dispose();
+				currentMidiFile = new MidiContainer(openFileDialog.SafeFileName, Melanchall.DryWetMidi.Smf.MidiFile.Read(openFileDialog.FileName));
 				MIDIPlayButton.Enabled = true;
 				MIDIStopButton.Enabled = true;
 				Log($"Loaded {openFileDialog.SafeFileName}.");
@@ -372,11 +368,11 @@ namespace TowerUniteMidiDotNet
 		private void MIDIPlaybackSpeedSlider_ValueChanged(object sender, EventArgs e)
 		{
 			midiPlaybackSpeed = MIDIPlaybackSpeedSlider.Value / 10.0;
-			ToolTipController.SetToolTip((TrackBar)sender, midiPlaybackSpeed.ToString());
+			ToolTipController.SetToolTip((TrackBar)sender, midiPlaybackSpeed.ToString() + "x");
 			
-			if(currentMidi != null)
+			if(currentMidiFile != null)
 			{
-				currentMidi.MidiPlayback.Speed = midiPlaybackSpeed;
+				currentMidiFile.MidiPlayback.Speed = midiPlaybackSpeed;
 			}
 		}
 
