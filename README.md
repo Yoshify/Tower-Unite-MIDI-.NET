@@ -53,10 +53,10 @@ open your Tower Unite window and hit the **F1** key.
 My program not only solves these limitations, but offers a fair bit more in terms of functionality.
 
 ## Isn't automation software against the rules?
-Macroing is a touchy subject in Tower Unite. [As stated here](https://forums.pixeltailgames.com/t/regarding-piano-macros/14111/15) by the lead developer of Tower Unite, piano macro's are okay, and I've personally never experienced an issue during testing. Even though this software doesn't inject anything and only sends keypresses, I'd still take care in condo's as condo's are VAC protected, and VAC doesn't discriminate. Please always make sure to take care in starting and stopping the software only while you're on the piano, and as always, this software is used at your own risk.
+Macroing is a touchy subject in Tower Unite. [As stated here](https://forums.pixeltailgames.com/t/regarding-piano-macros/14111/15) by the lead developer of Tower Unite, piano macro's are okay, and I've personally never experienced an issue during testing. Even though this software doesn't inject anything and only sends keypresses, I'd still take care as Tower Unite is VAC protected, and VAC doesn't discriminate. Please always make sure to take care in starting and stopping the software only while you're on the piano, and as always, this software is used at your own risk.
 
 ## Known Issues
-1. Sometimes, you may be required to spam the "stop" key or button when playing a MIDI, though I've rarely noticed this and cannot replicate it.
+1. Sometimes, you may be required to spam the "stop" key or button when playing a MIDI, though I've rarely encountered this and cannot reliably replicate it.
 2. Currently only supports a QWERTY keyboard layout. I'll make other layouts such as AZERTY if demand is high enough.
 
 ## Reporting an issue
