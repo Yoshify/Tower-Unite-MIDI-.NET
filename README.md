@@ -3,7 +3,7 @@
 ## What is Tower Unite MIDI .NET?
 This program was created due to a lack of options for using a MIDI piano with Tower Unite. Native support has been in the talks for years, but so far there hasn't been any notable progress. Tower Unite MIDI .NET will convert any MIDI devices input into something Tower Unite can read. Due to popular request during development, playback of MIDI files has also been implemented.
 
-Tower Unite MIDI .NET is written in C# and heavily utilises the NAudio and DryWetMidi libraries.
+Tower Unite MIDI .NET is written in C# and heavily utilises the [NAudio](https://github.com/naudio/NAudio) and [DryWetMidi](https://github.com/melanchall/drywetmidi) libraries.
 
 ## Okay, how do I use it? 
 Using Tower Unite MIDI .NET is simple!
