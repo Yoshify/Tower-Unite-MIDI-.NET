@@ -37,7 +37,7 @@ open your Tower Unite window and hit the **F1** key.
 
    7A. Ping Input
       
-      On laggier connections, you'll notice some dud black keys. This is because Tower Unite doesn't have enough time to register the fact that the program has hit the shift key. To combat this, the program has a miniscule delay (15ms) built in to key presses, but sometimes that's not enough. If you're having problems, using this to input your Tower Unite ping and the program will do its best to assign a more appropriate key delay.
+      On laggier connections, you'll notice some dud black keys. This is because Tower Unite doesn't have enough time to register the fact that the program has hit the shift key. To combat this, the program has a miniscule delay (15ms) built in to key presses, but sometimes that's not enough. If you're having problems, using this to input your Tower Unite ping and the program will do its best to assign a more appropriate key delay. Please note that this will the latency between your key presses vs. when you hear them.
       
    7B. Detailed Logging
    
