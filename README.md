@@ -62,6 +62,9 @@ Macroing is a touchy subject in Tower Unite. [As stated here](https://forums.pix
 ## Reporting an issue
 Please either raise an issue here on Github, or [email me.](mailto:xyoshify@gmail.com)
 
+## Upcoming
+Probably going to rewrite a majority of the code to remove NAudio and rely solely on the DWM library. Currently DWM is used for playback whereas NAudio is used for MIDI input.
+
 ## License
 MIT License
 
