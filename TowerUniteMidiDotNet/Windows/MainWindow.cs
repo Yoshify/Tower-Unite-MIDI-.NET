@@ -12,7 +12,7 @@ namespace TowerUniteMidiDotNet.Windows
 {
 	public partial class MainWindow : Form
 	{
-		public const float VersionNumber = 1.1f;
+		public const string Version = "1.1.1f";
 		public static int KeyDelay = 15;
 
 		private InputDevice currentMidiDevice;
@@ -66,7 +66,7 @@ namespace TowerUniteMidiDotNet.Windows
 
 			HotkeyManager.Current.AddOrReplace("Start", startKey, OnHotkeyPress);
 			HotkeyManager.Current.AddOrReplace("Stop", stopKey, OnHotkeyPress);
-			Text += " " + VersionNumber.ToString("0.0");
+			Text += " " + Version;
 		}
 
 		/// <summary>
@@ -321,7 +321,6 @@ namespace TowerUniteMidiDotNet.Windows
 
 			if (openFileDialog.ShowDialog() == DialogResult.OK)
 			{
-				currentMidiFile?.MidiPlayback.OutputDevice.Dispose();
 				currentMidiFile = new MidiContainer(openFileDialog.SafeFileName, Melanchall.DryWetMidi.Smf.MidiFile.Read(openFileDialog.FileName));
 				MIDIPlayButton.Enabled = true;
 				MIDIStopButton.Enabled = true;
