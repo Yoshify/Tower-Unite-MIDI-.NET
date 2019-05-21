@@ -12,13 +12,13 @@ namespace TowerUniteMidiDotNet.Windows
 {
 	public partial class MainWindow : Form
 	{
-		public const string Version = "1.1.1f";
+		public const string Version = "1.1.2";
 		public static int KeyDelay = 15;
 
 		private InputDevice currentMidiDevice;
-		private int noteLookupOctaveTransposition = 3;
 		private MidiContainer currentMidiFile;
 		private bool detailedLogging = false;
+		private int noteLookupOctaveTransposition = 3;
 		private int midiTransposition = 0;
 		private double midiPlaybackSpeed = 1.0;
 		private Dictionary<int, Note> noteLookup;
@@ -229,7 +229,12 @@ namespace TowerUniteMidiDotNet.Windows
 			if(e.Event is NoteOnEvent)
 			{
 				NoteOnEvent evt = e.Event as NoteOnEvent;
-				
+
+				if(evt.Velocity == 0)
+				{
+					return;
+				}
+
 				if(noteLookup.TryGetValue(evt.NoteNumber, out Note note))
 				{
 					note.Play();
